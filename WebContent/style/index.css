@@ -1,0 +1,131 @@
+html{
+	font-family:sans-serif;
+	font-size:10x;
+	color:white;
+	background-color:black;
+	margin:0px;
+	padding:0px;
+	
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+#theCPU{
+	width:100%;
+}
+
+#clickEater{
+	position:absolute;
+	height:99%;
+	width:99%;
+	background-color:yellow;
+	opacity:.2;
+	z-index:10;
+}
+
+table{
+	font-size:11px;
+	color:white;
+	background-color:black;
+	margin-bottom:2px;
+}
+
+th{
+	text-align:left;
+}
+
+.title_bar{
+	padding:4px;
+	background-color:grey;
+	width:100%;
+	height:25px;
+
+	vertical-align:middle;
+}
+
+.title{
+	line-height:25px;
+	font-size:20px;
+	margin-left:20px;
+	top:-4px;
+	position:relative;
+}
+
+.button{
+	width:25px;
+}
+
+.button:hover{
+	cursor:pointer;
+}
+
+.led{
+	width:15px;
+	height:15px;
+	margin:2px;
+}
+
+.on {
+	opacity:1;
+}
+
+.enabled{
+	background-color:green;
+	color:white;
+}
+
+.disabled{
+	background-color:red;
+	color:white;
+}
+
+.off {	
+	opacity:.5;
+}
+
+th{
+	border:1px solid white;
+}
+
+.label{
+	padding-top:2px;
+	color:yellow;
+}
+
+@font-face {
+  font-family: 'FontSegmentFixed';
+  src: url('../font/Segment7Standard.otf') format('opentype'); /* Chrome 4+, Firefox 3.5, Opera 10+, Safari 3—5 */
+}  
+
+.font_segment{
+	font-family:"FontSegmentFixed";
+	color:red;
+	font-size:50px;
+}
+
+.css_led{
+	width:13px;
+	height:13px;
+	border-radius:15px;
+	color:white;
+	font-size:8px;
+	text-align:center;
+	vertical-align:middle;
+	border:2px;
+	border-color:grey;
+	border-style:solid;
+	line-height:17px;
+	display:inline-block;
+}
+
+.red_led{
+	background-color:red;
+}

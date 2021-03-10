@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<!doctype html>
+<html lang="en" class="noselect">
+<head>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>J-SAP</title>
+  
+<!-- 
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+-->
+ 
+<link rel="stylesheet" href="jquery/jquery-ui.min.css">
+<script src="jquery/jquery-2.1.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+<!--
+  <script>
+  $( function() {
+    $( "#dialog" ).dialog();
+  } );
+  </script>
+-->
+			  
+<script src="js/constants.js"></script>
+<script src="js/util.js"></script>
+<script src="js/clock.js"></script>
+<script src="js/pc.js"></script>
+<script src="js/bus.js"></script>
+<script src="js/register.js"></script>
+<script src="js/alu.js"></script>
+<script src="js/flag.js"></script>
+<script src="js/output.js"></script>
+<script src="js/mar.js"></script>
+<script src="js/ram.js"></script>
+<script src="js/ir.js"></script>
+<script src="js/idec.js"></script>
+<script src="js/mc.js"></script>
+<script src="js/main.js"></script>
+<script src="js/disassembler.js"></script>
+
+<link rel="stylesheet" href="style/index.css">
+
+<head>
+
+</head>
+
+<body onload="main()">
+
+<div class="title_bar">
+	<img id="btn_power" onclick='onPower()' class="off button" title="Power Button - WILL erase ram/microcode" src="image/btn_power.png">
+	<img id="reset_power" onclick='onReset(false)' class="button" title="Reset CPU - will NOT erase ram/microcode" src="image/btn_reset.png">
+	<img id="help_power" onclick='onHelp()' class="button" title="What do/can I do?" src="image/btn_help.png">
+	<span class="title">J-SAP1 - <u>S</u>imple <u>A</u>s <u>P</u>ossible CPU - HTML/CSS/Javascript/jQuery (v 2018.09.21a)</span>
+</div>
+
+<div id="clickEater"></div>
+
+<!-- *** BEGIN CPU *** -->
+<table id="theCPU">
+<tr><th>Component</th><th>Bus</th><th>Component</th></tr>
+<tr>
+
+<!-- *** LEFT COMPONENT STACK -->
+<td>
+
+<!-- Clock -->
+<span class="label">Clock (clk)</span>
+<table border='1' width="100%">
+	<tr><th>Actions</th><th>Parameters</th><th>Indicator (leading edge)</th><th>Control</th></tr>
+	<tr>
+		<td><button id='btn_clock_pulse' onclick='clock.onClickPulse()'>pulse</button></td>
+		<td>delay(ms)&nbsp;<input id='txt_clock_interval' type='text' size='5'><button onclick='clock.onClickInterval()'>update</button></td>
+		<td><img id="led_clock" class="led off" alt="clock signal" src="image/led_blue.png"></td>
+		<td><input id='chk_clk_hlt' type='checkbox' onclick='clock.onCtlHlt()'>HLT</td>
+	</tr>
+</table>
+
+<!-- Memory  Address Register -->	
+<span class="label">Memory Address Register (mar)</span>
+<table border='1' width="100%">
+	<tr><th>Address Select (manual / bus)</th><th>Manual Address</th><th>Address Value<th>Control</th></tr>
+	<tr>
+		<td>
+			<button onclick="mar.onAddressSelect()">go</button>
+			<img id="led_mar_manual" class="led off" title="Using Manual Address" src="image/led_red.png">
+			<img id="led_mar_bus" class="led off" title="Using Bus Address " src="image/led_green.png">
+		</td>
+		<td>
+			<input id='chk_mar_manual_bit_3' type='checkbox' onclick='mar.onManual()'>
+			<input id='chk_mar_manual_bit_2' type='checkbox' onclick='mar.onManual()'>
+			<input id='chk_mar_manual_bit_1' type='checkbox' onclick='mar.onManual()'>
+			<input id='chk_mar_manual_bit_0' type='checkbox' onclick='mar.onManual()'>
+		</td>
+	<td>
+		<img id="led_mar_3" class="led off" title="led mar bit 3" src="image/led_yellow.png">
+		<img id="led_mar_2" class="led off" title="led mar bit 2" src="image/led_yellow.png">
+		<img id="led_mar_1" class="led off" title="led mar bit 1" src="image/led_yellow.png">
+		<img id="led_mar_0" class="led off" title="led mar bit 0" src="image/led_yellow.png">
+	</td>
+		<td>
+		<input id='chk_mar_in' type='checkbox' onclick='mar.onCtlIn()'>MI
+		</td>
+	</tr>
+</table>
+
+<!-- RAM Memory  -->	
+<span class="label">RAM Memory - 16 bytes (ram)</span>
+<table border='1' width="100%">
+	<tr><th>Program</th><th>Manual Value Input</th><th>Ram Value</th><th>Control</th></tr>
+	<tr>
+	<td>
+		<button onclick="ram.onProgramList()">list</button>
+		<select id='ram_program' onchange="ram.onProgramSelect()">
+			<option value="CLR">CLR</option>
+			<option value="hello42">Hello 42</option>
+			<option value="mult5">Multiply By 5</option>
+		</select>
+	</td>
+	
+	<td>
+		<button onclick="ram.onStoreClick();">store</button>
+		
+		<input id='chk_ram_bit_7' type='checkbox'>
+		<input id='chk_ram_bit_6' type='checkbox'>
+		<input id='chk_ram_bit_5' type='checkbox'>
+		<input id='chk_ram_bit_4' type='checkbox'>
+		<input id='chk_ram_bit_3' type='checkbox'>
+		<input id='chk_ram_bit_2' type='checkbox'>
+		<input id='chk_ram_bit_1' type='checkbox'>
+		<input id='chk_ram_bit_0' type='checkbox'>
+</td>
+	<td>
+		<img id="led_ram_7" class="led off" title="led ram bit 7" src="image/led_red.png">
+		<img id="led_ram_6" class="led off" title="led ram bit 6" src="image/led_red.png">
+		<img id="led_ram_5" class="led off" title="led ram bit 5" src="image/led_red.png">
+		<img id="led_ram_4" class="led off" title="led ram bit 4" src="image/led_red.png">
+		<img id="led_ram_3" class="led off" title="led ram bit 3" src="image/led_red.png">
+		<img id="led_ram_2" class="led off" title="led ram bit 2" src="image/led_red.png">
+		<img id="led_ram_1" class="led off" title="led ram bit 1" src="image/led_red.png">
+		<img id="led_ram_0" class="led off" title="led ram bit 0" src="image/led_red.png">
+	</td>
+	<td>
+		<input id='chk_ram_in' type='checkbox' onclick='ram.onCtlIn()'>RI&nbsp;
+		<input id='chk_ram_out' type='checkbox' onclick='ram.onCtlOut()'>RO
+	</td>
+	</tr>
+</table>
+
+<!-- Instruction Register  -->	
+<span class="label">Instruction Register (ir)</span>
+<table border='1' width="100%">
+	<tr><th>Instruction (blue) / Operand (yellow)</th><th>Instruction</th><th>Control</th></tr>
+	<tr>
+	<td>
+		<img id="led_ir_7" class="led off" title="led ir bit 7" src="image/led_blue.png">
+		<img id="led_ir_6" class="led off" title="led ir bit 6" src="image/led_blue.png">
+		<img id="led_ir_5" class="led off" title="led ir bit 5" src="image/led_blue.png">
+		<img id="led_ir_4" class="led off" title="led ir bit 4" src="image/led_blue.png">
+		<img id="led_ir_3" class="led off" title="led ir bit 3" src="image/led_yellow.png">
+		<img id="led_ir_2" class="led off" title="led ir bit 2" src="image/led_yellow.png">
+		<img id="led_ir_1" class="led off" title="led ir bit 1" src="image/led_yellow.png">
+		<img id="led_ir_0" class="led off" title="led ir bit 0" src="image/led_yellow.png">
+	</td>
+	<td id="instr_text">---</td>
+	<td>
+		<input id='chk_ir_in' type='checkbox' onclick='ir.onCtlIn()'>II
+		<input id='chk_ir_out' type='checkbox' onclick='ir.onCtlOut()'>IO
+	</td>
+	</tr>
+</table>
+
+<!-- Instruction Decoder  -->	
+<span class="label">Instruction Decoder (id)</span>
+<table border='1' width="100%">
+	<tr>
+		<th>Actions</th><th>Instruction Step Counter (trailing edge clock pulse)</th><th>Time Step</th></tr>
+	<tr>
+		<td>
+			<button class="disabled" id="btn_id_enable_toggle" onclick="idec.onIdEnableToggle()">disabled</button>
+		</td>
+	<td>
+		<img id="led_id_2" class="led off" title="led id bit 2" src="image/led_red.png">
+		<img id="led_id_1" class="led off" title="led id bit 1" src="image/led_red.png">
+		<img id="led_id_0" class="led off" title="led id bit 0" src="image/led_red.png">
+	</td><td>	
+		<img id="led_id_T0" class="led off" title="led id Time 0" src="image/led_green.png">T0
+		<img id="led_id_T1" class="led off" title="led id Time 1" src="image/led_green.png">T1
+		<img id="led_id_T2" class="led off" title="led pc Time 2" src="image/led_green.png">T2
+		<img id="led_id_T3" class="led off" title="led pc Time 3" src="image/led_green.png">T3
+		<img id="led_id_T4" class="led off" title="led pc Time 4" src="image/led_green.png">T4
+	</td>
+	</tr>
+</table>
+
+<!-- Microcode  -->	
+<span class="label">Micro Code (mc)</span>
+<table border='1' width="100%">
+	<tr><th>Actions</th><th>Address Select</th><th>Manual Address (unused bit, 4-bit instruction code / 3-bit step)</th></tr>
+	<tr>
+		<td>
+			<button class="disabled" id="btn_mc_enable_toggle" onclick="mc.onMcEnableToggle()">disabled</button>
+		</td>
+		<td>
+			<button onclick="mc.onAddressSelect()">go</button>
+			<img id="led_mc_manual" class="led off" title="Using Manual address" src="image/led_red.png">
+			<img id="led_mc_ir-id" class="led off" title="Using Instruction (ir)/step(id) format = 0IIISSS" src="image/led_green.png">
+		</td>
+	<td>
+		
+		0
+		<input id='chk_mc_addr_bit_6' type='checkbox' onclick='mc.onManual()'>
+		<input id='chk_mc_addr_bit_5' type='checkbox' onclick='mc.onManual()'>
+		<input id='chk_mc_addr_bit_4' type='checkbox' onclick='mc.onManual()'>
+		<input id='chk_mc_addr_bit_3' type='checkbox' onclick='mc.onManual()'>&nbsp;/
+		<input id='chk_mc_addr_bit_2' type='checkbox' onclick='mc.onManual()'>
+		<input id='chk_mc_addr_bit_1' type='checkbox' onclick='mc.onManual()'>
+		<input id='chk_mc_addr_bit_0' type='checkbox' onclick='mc.onManual()'>
+	
+	</td>
+	</tr>
+	<tr><th>Program</th><th colspan='2'>Manual Value Input</th></tr>
+	<tr>
+	<td>
+		<button onclick="mc.onProgramList()">list</button>
+		<select id='mc_program' onchange="mc.onProgramSelect()">
+			<option value="CLR">CLR</option>
+			<option value="">Microcode42</option>
+			<option value="">Fetch+5</option>
+		</select>
+	</td>
+	
+	<td colspan='2'>
+		<button onclick="mc.onStoreClick();">store</button>
+		
+		<input id='chk_mc_bit_15' type='checkbox'>
+		<input id='chk_mc_bit_14' type='checkbox'>
+		<input id='chk_mc_bit_13' type='checkbox'>
+		<input id='chk_mc_bit_12' type='checkbox'>
+		<input id='chk_mc_bit_11' type='checkbox'>
+		<input id='chk_mc_bit_10' type='checkbox'>
+		<input id='chk_mc_bit_9' type='checkbox'>
+		<input id='chk_mc_bit_8' type='checkbox'>
+		<input id='chk_mc_bit_7' type='checkbox'>
+		<input id='chk_mc_bit_6' type='checkbox'>
+		<input id='chk_mc_bit_5' type='checkbox'>
+		<input id='chk_mc_bit_4' type='checkbox'>
+		<input id='chk_mc_bit_3' type='checkbox'>
+		<input id='chk_mc_bit_2' type='checkbox'>
+		<input id='chk_mc_bit_1' type='checkbox'>
+		<input id='chk_mc_bit_0' type='checkbox'>
+	</td>
+</tr>	
+</table>
+
+<!-- Control Word -->
+<table border='1' width="100%">
+	<tr><th colspan="16">Control Word</th></tr>
+	
+	<tr>
+		<td>
+			<img id="led_cw_15" class="led off" title="Control Word - Halt" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_14" class="led off" title="Control Word - Memory In" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_13" class="led off" title="Control Word - Ram In" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_12" class="led off" title="Control Word - Ram Out" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_11" class="led off" title="Control Word - Instruction Register Out" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_10" class="led off" title="Control Word - Instruction Register In" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_9" class="led off" title="Control Word - Register A In" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_8" class="led off" title="Control Word - Register A Out" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_7" class="led off" title="Control Word - ALU Out" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_6" class="led off" title="Control Word - ALU Subtract" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_5" class="led off" title="Control Word - Register B In" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_4" class="led off" title="Control Word - Output In" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_3" class="led off" title="Control Word - Counter Enable" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_2" class="led off" title="Control Word - Counter Out" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_1" class="led off" title="Control Word - Jump" src="image/led_blue.png">
+		</td><td>	
+			<img id="led_cw_0" class="led off" title="Control Word - Flag Register In" src="image/led_blue.png">
+		</td>
+	</tr>
+	
+	<tr>
+		<td valign="top">H<br>L<br>T</td>
+		<td valign="top">M<br>I</td>
+		<td valign="top">R<br>I</td>
+		<td valign="top">R<br>O</td>
+		<td valign="top">I<br>O</td>
+		<td valign="top">I<br>I</td>
+		<td valign="top">A<br>I</td>
+		<td valign="top">A<br>O</td>
+		<td valign="top">&#931;<br>O</td>
+		<td valign="top">S<br>U</td>
+		<td valign="top">B<br>I</td>
+		<td valign="top">O<br>I</td>
+		<td valign="top">C<br>E</td>
+		<td valign="top">C<br>O</td>
+		<td valign="top">J</td>
+		<td valign="top">F<br>I</td>
+	<tr>
+	
+</table>
+
+<!-- *** END LEFT COMPONENT STACK -->
+</td>
+
+<!--  *** BUS COLUMN -->
+
+<td height="100%" style="background-color:#aaaaaa"></td>
+
+<!-- ***RIGHT COMPONENT STACK -->
+
+<td valign="top">
+
+<!-- Bus Address Value -->
+<span class="label">Address Bus Value</span>
+<table border='1' width="100%"><tr valign="top"><td>
+	<img id="led_bus_7" class="led off" title="led bus bit 7" src="image/led_red.png">
+	<img id="led_bus_6" class="led off" title="led bus bit 6" src="image/led_red.png">
+	<img id="led_bus_5" class="led off" title="led bus bit 5" src="image/led_red.png">
+	<img id="led_bus_4" class="led off" title="led bus bit 4" src="image/led_red.png">
+	<img id="led_bus_3" class="led off" title="led bus bit 3" src="image/led_red.png">
+	<img id="led_bus_2" class="led off" title="led bus bit 2" src="image/led_red.png">
+	<img id="led_bus_1" class="led off" title="led bus bit 1" src="image/led_red.png">
+	<img id="led_bus_0" class="led off" title="led bus bit 0" src="image/led_red.png">
+</td></tr>
+</table>
+
+<!--  Program Counter -->
+<span class="label">Program Counter (pc) (leading edge clock pulse)</span>
+<table border='1' width="100%">
+	<tr><th>Control</th><th>Value</th></tr>
+	<tr>
+	
+	<td>
+	<input id='chk_pc_out' type='checkbox' onclick='pc.onCtlOut()'><span title="Program counter out">CO</span>&nbsp;     
+	<input id='chk_pc_jmp' type='checkbox' onclick='pc.onCtlJmp()'><span title="Jump (Program counter in)">J</span>&nbsp;
+	<input id='chk_pc_ce' type='checkbox' onclick='pc.onCtlEnable()'><span title="Count enable (increment)">CE</span>
+	</td>
+	<td>
+		<img id="led_pc_3" class="led off" title="led pc bit 3" src="image/led_green.png">
+		<img id="led_pc_2" class="led off" title="led pc bit 2" src="image/led_green.png">
+		<img id="led_pc_1" class="led off" title="led pc bit 1" src="image/led_green.png">
+		<img id="led_pc_0" class="led off" title="led pc bit 0" src="image/led_green.png">
+	</td>
+	</tr>
+</table>
+
+<!-- Register A -->
+<span class="label">Register 'A' (ra)</span>
+<table border='1' width="100%">
+	<tr><th>Control</th><th>Value</th></tr>
+	<tr>
+	
+	<td>
+	<input id='chk_ra_out' type='checkbox' onclick='ra.onCtlOut()'>AO&nbsp;
+	<input id='chk_ra_in' type='checkbox' onclick='ra.onCtlIn()'>AI
+	</td>
+	<td>
+		<img id="led_ra_7" class="led off" title="led pc bit 7" src="image/led_red.png">
+		<img id="led_ra_6" class="led off" title="led pc bit 6" src="image/led_red.png">
+		<img id="led_ra_5" class="led off" title="led pc bit 5" src="image/led_red.png">
+		<img id="led_ra_4" class="led off" title="led pc bit 4" src="image/led_red.png">
+		<img id="led_ra_3" class="led off" title="led pc bit 3" src="image/led_red.png">
+		<img id="led_ra_2" class="led off" title="led pc bit 2" src="image/led_red.png">
+		<img id="led_ra_1" class="led off" title="led pc bit 1" src="image/led_red.png">
+		<img id="led_ra_0" class="led off" title="led pc bit 0" src="image/led_red.png">
+	</td>
+	</tr>
+</table>
+
+<!-- ALU -->
+<span class="label">Arithmetic Logic Unit (alu)</span>
+<table border='1' width="100%">
+	<tr><th>Control</th><th>Value</th></tr>
+	<tr>
+	
+	<td>
+	<input id='chk_alu_out' type='checkbox' onclick='alu.onCtlOut()'>&#931;O&nbsp;
+	<input id='chk_alu_sub' type='checkbox' onclick='alu.onCtlSub()'>SU
+	</td>
+	<td>
+		<img id="led_alu_7" class="led off" title="led alu bit 7" src="image/led_red.png">
+		<img id="led_alu_6" class="led off" title="led alu bit 6" src="image/led_red.png">
+		<img id="led_alu_5" class="led off" title="led alu bit 5" src="image/led_red.png">
+		<img id="led_alu_4" class="led off" title="led alu bit 4" src="image/led_red.png">
+		<img id="led_alu_3" class="led off" title="led alu bit 3" src="image/led_red.png">
+		<img id="led_alu_2" class="led off" title="led alu bit 2" src="image/led_red.png">
+		<img id="led_alu_1" class="led off" title="led alu bit 1" src="image/led_red.png">
+		<img id="led_alu_0" class="led off" title="led alu bit 0" src="image/led_red.png">
+	</td>
+	</tr>
+</table>
+
+<!-- Register B -->
+<span class="label">Register 'B' (rb)</span>
+<table border='1' width="100%">
+	<tr><th>Control</th><th>Value</th></tr>
+	<tr>
+	
+	<td>
+	<input id='chk_rb_in' type='checkbox' onclick='rb.onCtlIn()'>BI
+	</td>
+	<td>
+		<img id="led_rb_7" class="led off" title="led rb bit 7" src="image/led_red.png">
+		<img id="led_rb_6" class="led off" title="led rb bit 6" src="image/led_red.png">
+		<img id="led_rb_5" class="led off" title="led rb bit 5" src="image/led_red.png">
+		<img id="led_rb_4" class="led off" title="led rb bit 4" src="image/led_red.png">
+		<img id="led_rb_3" class="led off" title="led rb bit 3" src="image/led_red.png">
+		<img id="led_rb_2" class="led off" title="led rb bit 2" src="image/led_red.png">
+		<img id="led_rb_1" class="led off" title="led rb bit 1" src="image/led_red.png">
+		<img id="led_rb_0" class="led off" title="led rb bit 0" src="image/led_red.png">
+	</td>
+	</tr>
+</table>
+
+<!-- CPU Flags Register-->
+<!-- 
+<span class="label">CPU Flags Register (flag)</span>
+<table border='1' width="100%">
+	<tr><th>Control</th><th>Values</th></tr>
+	<tr>
+		<td>
+			<input id='chk_flag_in' type='checkbox' onclick='flag.onCtlIn()'>FI
+		</td>	
+		<td>
+			<img id="led_flag_cf" class="led off" title="Flags Register - Carry" src="image/led_green.png">CF&nbsp;
+			<img id="led_flag_zf" class="led off" title="Flags Register - Zero" src="image/led_green.png">ZF
+		</td>
+	</tr>	
+</table>
+-->
+
+
+<!-- Output -->
+<span class="label">Output (output)</span>
+<table border="1" width="100%">
+<tr><th>Control</th><th>Value</th></tr>
+	<tr>
+	<td valign="top">
+		<input id='chk_output_in' type='checkbox' onclick='output.onCtlIn()'>OI&nbsp;
+	</td>
+	<td><span id="display_value" class="font_segment">000</span></td>
+	</tr>
+</table>
+
+<!-- ** END RIGHT COMPONENT STACK -->
+</td>
+
+<!-- *** END CPU *** -->
+</tr>
+</table>
+
+
+
+
+
+<div id="dialog" style="display:none">---</div>
+
+</body>
+
+</html>
